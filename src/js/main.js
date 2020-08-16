@@ -118,7 +118,7 @@ const jugar = () => {
         alert("Primero inicie apuestas.");     
         return
     }
-    let numGanador = 12345;//Math.ceil(getRandomArbitrary(10000, 50000));
+    let numGanador = Math.ceil(getRandomArbitrary(10000, 50000)); //12345;
     createElement("numganador", numGanador);
     
     let arrayGanadores = [];
