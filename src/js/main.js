@@ -32,12 +32,17 @@ function removeElement(ubicacion, all = 0) {
     if (all ==0)
     {
         tag = document.getElementById(`${ubicacion}`).firstChild;
+        tag.parentNode.removeChild(tag);
     }
     else
     {
         tag = document.getElementById(`${ubicacion}`);
+
+        while (tag.lastElementChild) {
+            tag.removeChild(tag.lastElementChild);
+        }
     }
-    tag.parentNode.removeChild(tag);
+    
 
 }
 /**
@@ -45,13 +50,29 @@ function removeElement(ubicacion, all = 0) {
  * @param {int} i - valor del premio.
  * @author RABI LEONEL LEON CHAN
  */
-const cantidadPremios = (i) => {
+const cantidadPremios = () => {
     let suma = 0;
-    const SumaPremios = () => {
-        suma += i;
-        createElement("premio", `${suma.toFixed(2)}`);
+    return {
+        getsuma: () =>{
+            return suma;
+        },
+        setsuma: (i,noGano = false) => {
+            if (noGano)
+                suma += i;
+            else
+                suma = i;
+            createElement("premio", ` ${suma.toFixed(2)}`);
+        }
     }
-    return SumaPremios;
+    
+}
+
+function iniciaJuego(){
+    let arrayGanadores = [];
+    
+    removeElement("numganador",1);    
+    removeElement("ganador",1);  
+    setTimeout(crearJugador, 100);
 }
 
 /**
@@ -59,7 +80,9 @@ const cantidadPremios = (i) => {
  * @author RABI LEONEL LEON CHAN
  */
 const crearJugador = () => {
-
+    
+    
+    
     let name = prompt("Ingrese su nombre");
     let numero = prompt("Ingrese sus 5 números apostar");
 
@@ -82,7 +105,7 @@ const crearJugador = () => {
     }
     let jugadores = new Array({ name: name, num: numero });
 
-    saveList(jugadores);
+    listJugadores.setJugador(jugadores);
 
 }
 /**
@@ -90,28 +113,33 @@ const crearJugador = () => {
  * @author RABI LEONEL LEON CHAN
  */
 const jugar = () => {
+    let arrayParticipantes = listJugadores.getJugador();
+    if (arrayParticipantes.length == 0){
+        alert("Primero inicie apuestas.");     
+        return
+    }
     let numGanador = 12345;//Math.ceil(getRandomArbitrary(10000, 50000));
     createElement("numganador", numGanador);
-    let completado = false;
+    
+    let arrayGanadores = [];
+    let cont = 0;
 
-    for (var i = 0; i < arrayJugadores.length; i++) {
-        if (arrayJugadores[i].num == numGanador) {
-            completado = false;
-            createElement("ganador", `Nombre: ${arrayJugadores[i].name} | Número de apuesta: ${arrayJugadores[i].num}`);
-        }
-        else {
-            completado = true;
+    for (var i = 0; i < arrayParticipantes.length; i++) {
+        if (arrayParticipantes[i].num == numGanador) {
+            arrayGanadores.push(arrayParticipantes[i]);
+            cont ++;
+            createElement("ganador", `Felicidades!! ${arrayParticipantes[i].name} Ganaste $ ${newPremio.getsuma().toFixed(2)} con tu número de apuesta ${arrayParticipantes[i].num}`);
         }
     }
-    if (completado) {
-        alert("Sorteo terminado, :( el monto se agrega al siguiente sorteo.");
-        arrayJugadores = [];
-        removeElement("numganador");
-        removeElement("jugadores",1);
+    if (arrayGanadores.length == 0) {
+        alert("Sorteo terminado, :( el monto se acumula para al siguiente sorteo.");  
         removeElement("premio");
-        juegoCompletado = true;
-        newPremio();
+        let valor = newPremio.getsuma();
+        newPremio.setsuma(valor,true);   
     }
+    
+    limpiarDatos();
+    
 }
 
 /**
@@ -120,20 +148,30 @@ const jugar = () => {
  */
 const apostar = () => {
     let cont = 0;
-    const crearJugador = (jugadores) => {
-        arrayJugadores.push(jugadores[0]);
-        createElement("jugadores", `Nombre: ${arrayJugadores[cont].name} | Número de apuesta: ${arrayJugadores[cont].num}`);
-        cont++;
+    let arrayJugadores = [];
+    return {
+        getJugador: (jugadores) =>{
+            return arrayJugadores;
+        },
+        setJugador: (jugadores) => {
+            arrayJugadores.push(jugadores[0]);
+            createElement("jugadores", `Nombre: ${arrayJugadores[cont].name} | Número de apuesta: ${arrayJugadores[cont].num}`);
+            cont++;
+        }
     }
-
-    return crearJugador;
 }
 
-const newPremio = cantidadPremios(1000);
-newPremio();
-var saveList = apostar();
-var arrayJugadores = [];
-let juegoCompletado = false;
+const newPremio = cantidadPremios();
+newPremio.setsuma(1000);
+let listJugadores = apostar();
+
+let noGano = false;
+const limpiarDatos = () => {
+    saveList = apostar();
+    removeElement("jugadores",1);
+    listJugadores = apostar();
+    
+}
 
 
 
