@@ -9,9 +9,9 @@ En este reto, lleve a la práctica los temas de:
 * ✔
 
 ## Contenido
-Demo ➡ 
+Demo ➡ https://rabileon.github.io/challenge-closures-scope/src/index.html
 
-![Demo]()
+![Demo](https://i.imgur.com/4D4mjXs.jpg)
 
 ## Contacto
 * [Twitter](https://twitter.com/rabileon)
