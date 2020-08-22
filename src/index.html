@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✔RETO CLOUSURES AND SCOPES</title>   
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <style>
         body {
             margin: 0;
@@ -19,8 +20,11 @@
             color: #1BBC9B;
 
         }
+        input{
+            font-family: 'Poppins', sans-serif;
+        }
 
-        input {
+        .btn_ch {
             background-color: #1BBC9B;
             border: none;
             color: #FFFFFF;
@@ -32,7 +36,19 @@
             cursor: pointer;
         }
 
-        input:hover{
+        .btn_ch:disabled {
+            background-color: #cacaca;
+            border: none;
+            color: #000000;
+            font-size: 18px;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn_ch:hover{
             background-color: #270694;
         }
     </style>
@@ -40,7 +56,7 @@
 <body>
     <h1>::: RETO WEEK 01 :::</h1>
 
-    <h>JUGADORES | NUMERO</h2>
+    <h>JUGADORES | NÚMEROS</h2>
     <div id="jugadores"></div>
     <h2>PREMIO:</h2>
     <div id="premio"></div>
@@ -48,9 +64,10 @@
     <div id="numganador"></div>
     <h2>GANADOR(ES):</h2>
     <div id="ganador"></div>
+    <button class="btn_ch" id="Apostar" onclick="crearJugador()">APOSTAR</button>
+    <button class="btn_ch" id="Jugar" onclick="jugar()">JUGAR</button>
 
-    <input type="button" onclick="iniciaJuego()" value="APOSTAR">
-    <input type="button" onclick="jugar()" value="JUGAR">
+    <button class="btn_ch" id="Reiniciar" hidden onclick="Refresh()">Reiniciar</button>
 
     <script src="js/main.js"></script>
 </body>

@@ -29,20 +29,18 @@ function getRandomArbitrary(min, max) {
  */
 function removeElement(ubicacion, all = 0) {
     var tag;
-    if (all ==0)
-    {
+    if (all == 0) {
         tag = document.getElementById(`${ubicacion}`).firstChild;
         tag.parentNode.removeChild(tag);
     }
-    else
-    {
+    else {
         tag = document.getElementById(`${ubicacion}`);
-
         while (tag.lastElementChild) {
             tag.removeChild(tag.lastElementChild);
         }
+
     }
-    
+
 
 }
 /**
@@ -50,62 +48,67 @@ function removeElement(ubicacion, all = 0) {
  * @param {int} i - valor del premio.
  * @author RABI LEONEL LEON CHAN
  */
-const cantidadPremios = () => {
+const cantidadPremios = (i) => {
     let suma = 0;
-    return {
-        getsuma: () =>{
-            return suma;
-        },
-        setsuma: (i,noGano = false) => {
-            if (noGano)
-                suma += i;
-            else
-                suma = i;
-            createElement("premio", ` ${suma.toFixed(2)}`);
-        }
+    const SumaPremios = () => {
+        suma += i;
+        createElement("premio", `${suma.toFixed(2)}`);
     }
-    
-}
-
-function iniciaJuego(){
-    let arrayGanadores = [];
-    
-    removeElement("numganador",1);    
-    removeElement("ganador",1);  
-    setTimeout(crearJugador, 100);
+    return SumaPremios;
 }
 
 /**
  * Crea losjugadores que participaran en la rifa
  * @author RABI LEONEL LEON CHAN
  */
-const crearJugador = () => {
-    
-    
-    
-    let name = prompt("Ingrese su nombre");
-    let numero = prompt("Ingrese sus 5 números apostar");
+const crearJugador = async () => {
+    const { value: nombre } = await Swal.fire({
+        title: '¿Cual es su nombre?',
+        input: 'text',
+        inputPlaceholder: 'Escriba aquí su nombre',
+        showCancelButton: false,
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Es necesario ingresar su nombre'
+            }
+        }
+    });
+    let existe, numero;
+    let info = "";
+    let numeros = [];
 
-    if (name == null) {
-        alert("Por Favor,ingresa un nombre");
-        return;
+    for (i = 0; i < 5; i++) {
+        do {
+
+            const { value: num } = await Swal.fire({
+                title: `${(i + 1)}° número de apuesta ${info}`,
+                input: 'text',
+                inputPlaceholder: 'Escriba un número del 0 al 99',
+                showCancelButton: false,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Es necesario ingresar un número'
+                    }
+                }
+            });
+
+
+            existe = true;
+            if ((num > 0) && (num < 99)) {
+                numero = num;
+                existe = false;
+                info = "";
+            }
+            else {
+                info = "[=>FUERA DE RANGO<=]";
+            }
+        } while (existe)
+        numeros.push(numero);
     }
 
-    if (numero == null) {
-        alert("Por Favor, Ingresa tu número de apuesta");
-        return;
-    }
+    let jugadores = new Array({ nombre: nombre, numeros: numeros });
 
-    
-
-    if(!numero.match(/^[0-9][0-9][0-9][0-9][0-9]$/))
-    {
-        alert("Solo se permiten 5 números");
-        return;
-    }
-    let jugadores = new Array({ name: name, num: numero });
-
-    listJugadores.setJugador(jugadores);
+    saveList(jugadores);
 
 }
 /**
@@ -113,33 +116,48 @@ const crearJugador = () => {
  * @author RABI LEONEL LEON CHAN
  */
 const jugar = () => {
-    let arrayParticipantes = listJugadores.getJugador();
-    if (arrayParticipantes.length == 0){
-        alert("Primero inicie apuestas.");     
-        return
+    let arrayNumGanador = [];
+    let isWinner = false;
+    let countGanador = 0;
+    for (var i = 0; i < 5; i++) {
+        arrayNumGanador.push(Math.ceil(getRandomArbitrary(0, 99)));
     }
-    let numGanador = Math.ceil(getRandomArbitrary(10000, 50000)); //12345;
-    createElement("numganador", numGanador);
-    
-    let arrayGanadores = [];
-    let cont = 0;
 
-    for (var i = 0; i < arrayParticipantes.length; i++) {
-        if (arrayParticipantes[i].num == numGanador) {
-            arrayGanadores.push(arrayParticipantes[i]);
-            cont ++;
-            createElement("ganador", `Felicidades!! ${arrayParticipantes[i].name} Ganaste $ ${newPremio.getsuma().toFixed(2)} con tu número de apuesta ${arrayParticipantes[i].num}`);
+    createElement("numganador", arrayNumGanador);
+
+    for (var j = 0; j < arrayJugadores.length; j++) {
+        for (var k = 0; k < arrayJugadores[j].numeros.length; k++) {
+            let result = arrayNumGanador.find(element => element == arrayJugadores[j].numeros[k]);
+            if (result === undefined) {
+                isWinner = false;
+                break;
+            }
+            else
+                isWinner = true;
+        }
+        if (isWinner) {
+            document.getElementById("Apostar").disabled = true;
+            document.getElementById("Jugar").disabled = true;
+            document.getElementById("Reiniciar").hidden = false;
+            countGanador++;
+            createElement("ganador", `Felicidades!! ${arrayJugadores[j].nombre.toUpperCase()} Ganaste con tu números de apuesta ${arrayJugadores[j].numeros}`);
         }
     }
-    if (arrayGanadores.length == 0) {
-        alert("Sorteo terminado, :( el monto se acumula para al siguiente sorteo.");  
+
+    if (countGanador == 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sorteo Terminado',
+            html: `<strong>Número Ganador: ${arrayNumGanador}</strong> <br/> <strong>Ganadores: ${countGanador}</strong> <br/>El monto se suma para el próximo sorteo`,
+        });
+
+        arrayJugadores = [];
+        removeElement("numganador");
+        removeElement("jugadores", 1);
         removeElement("premio");
-        let valor = newPremio.getsuma();
-        newPremio.setsuma(valor,true);   
+        newPremio();
     }
-    
-    limpiarDatos();
-    
+
 }
 
 /**
@@ -148,30 +166,28 @@ const jugar = () => {
  */
 const apostar = () => {
     let cont = 0;
-    let arrayJugadores = [];
-    return {
-        getJugador: (jugadores) =>{
-            return arrayJugadores;
-        },
-        setJugador: (jugadores) => {
-            arrayJugadores.push(jugadores[0]);
-            createElement("jugadores", `Nombre: ${arrayJugadores[cont].name} | Número de apuesta: ${arrayJugadores[cont].num}`);
-            cont++;
-        }
+    const crearJugador = (jugadores) => {
+        arrayJugadores.push(jugadores[0]);
+        createElement("jugadores", `Nombre: <strong> ${jugadores[0].nombre.toUpperCase()}</strong> &nbspNúmeros a jugar: ${jugadores[0].numeros}`);
+        cont++;
     }
+
+    return crearJugador;
 }
 
-const newPremio = cantidadPremios();
-newPremio.setsuma(1000);
-let listJugadores = apostar();
-
-let noGano = false;
-const limpiarDatos = () => {
-    saveList = apostar();
-    removeElement("jugadores",1);
-    listJugadores = apostar();
-    
+const Refresh = () => {
+    location.reload();
 }
+
+const newPremio = cantidadPremios(1000);
+newPremio();
+var saveList = apostar();
+var arrayJugadores = [];
+let juegoCompletado = false;
+Swal.fire({
+    title: 'Bienvenido',
+    text: '1. Para iniciar el juego haga click en APOSTAR, usted podrá apuntar 5 números.\n2.Seguidamente haga click en JUGAR para iniciar el sorteo'
+});
 
 
 
